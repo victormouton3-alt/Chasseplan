@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#1a2e1a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>ChassePlan</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0f1a0f;--bg2:#162016;--bg3:#1e2e1e;--card:#1a2a1a;--card2:#223022;
+  --border:#2d3f2d;--green:#4a7c3f;--green-light:#6aad5a;--green-dim:#2d5a27;
+  --orange:#c4621d;--orange-light:#e07830;--cream:#e8dcc8;--cream-dim:#b8a888;
+  --text:#ddd8cc;--text-dim:#8a8478;--danger:#c43030;--gold:#c9a84c;
+  --radius:14px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text)}
+
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;transition:opacity .3s,transform .3s}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(20px)}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:90px}
+.scroll-area::-webkit-scrollbar{display:none}
+
+/* TOPBAR */
+.topbar{padding:52px 20px 14px;background:linear-gradient(180deg,var(--bg) 70%,transparent);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.topbar-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);letter-spacing:.5px}
+.topbar-sub{font-size:12px;color:var(--text-dim);margin-top:1px}
+
+/* NAV */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,8px);z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 6px;background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:10px;font-family:'DM Sans',sans-serif;transition:color .2s;gap:4px}
+.nav-btn.active{color:var(--green-light)}
+.nav-btn svg{width:22px;height:22px}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--green-light);margin-top:2px;opacity:0;transition:opacity .2s}
+.nav-btn.active .nav-dot{opacity:1}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 16px 12px}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:all .2s;width:100%}
+.btn-primary{background:var(--green);color:white}
+.btn-primary:active{background:var(--green-dim);transform:scale(.98)}
+.btn-orange{background:var(--orange);color:white}
+.btn-orange:active{transform:scale(.98)}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-danger{background:var(--danger);color:white}
+.btn-sm{padding:8px 14px;font-size:13px;width:auto;border-radius:var(--radius-sm)}
+.btn:disabled{opacity:.4;pointer-events:none}
+
+/* INPUTS */
+.input-group{margin-bottom:14px}
+.input-label{font-size:12px;color:var(--text-dim);margin-bottom:6px;display:block;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.input:focus{border-color:var(--green)}
+.input::placeholder{color:var(--text-dim)}
+textarea.input{resize:vertical;min-height:120px;line-height:1.6}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(74,124,63,.25);color:var(--green-light);border:1px solid rgba(74,124,63,.4)}
+.badge-orange{background:rgba(196,98,29,.25);color:var(--orange-light);border:1px solid rgba(196,98,29,.4)}
+.badge-gold{background:rgba(201,168,76,.2);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+
+.section-tag{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);padding:0 16px;margin:20px 0 10px}
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* LOGIN */
+#screen-login{background:radial-gradient(ellipse at 30% 20%,#1e3a1a 0%,var(--bg) 60%);justify-content:center;padding:40px 28px;gap:20px}
+.login-logo{text-align:center}
+.login-logo-icon{width:72px;height:72px;background:var(--green-dim);border-radius:20px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 0 40px rgba(74,124,63,.3)}
+.login-logo h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;color:var(--cream);letter-spacing:1px}
+.login-logo p{color:var(--text-dim);font-size:14px;margin-top:4px}
+.login-tabs{display:flex;background:var(--bg3);border-radius:var(--radius-sm);padding:4px;gap:4px}
+.login-tab{flex:1;padding:9px;border-radius:6px;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text-dim);cursor:pointer;transition:all .2s}
+.login-tab.active{background:var(--card);color:var(--cream);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+/* HOME */
+.hero-banner{margin:0 16px 16px;background:linear-gradient(135deg,var(--green-dim),#1a3a18);border-radius:var(--radius);padding:20px;border:1px solid var(--green);position:relative;overflow:hidden}
+.hero-banner::before{content:'🌲';position:absolute;right:-10px;bottom:-20px;font-size:100px;opacity:.07;transform:rotate(-15deg)}
+.hero-banner h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--cream);margin-bottom:4px}
+.hero-banner p{font-size:13px;color:var(--cream-dim)}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 16px 16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center}
+.stat-card .num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--green-light)}
+.stat-card .lbl{font-size:11px;color:var(--text-dim);margin-top:2px}
+.next-hunt{margin:0 16px 16px;background:linear-gradient(135deg,#2a1e0a,#3a2a10);border:1px solid var(--gold);border-radius:var(--radius);padding:16px}
+.next-hunt h3{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+
+/* CARTE */
+.map-container{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.map-canvas-wrap{width:100%;aspect-ratio:4/3;position:relative;overflow:hidden;cursor:crosshair}
+#map-canvas{width:100%;height:100%;display:block}
+.map-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:var(--text-dim);font-size:11px;padding:4px 12px;border-radius:99px;pointer-events:none;white-space:nowrap}
+.map-toolbar{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+.map-tool-btn{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:8px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.map-tool-btn.active-tool{background:var(--green-dim);border-color:var(--green);color:white}
+.poste-list-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.poste-list-item:active{background:var(--bg3)}
+.poste-num{width:36px;height:36px;border-radius:50%;background:var(--green-dim);color:white;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.poste-info .name{font-weight:600;font-size:14px}
+.poste-info .desc{font-size:12px;color:var(--text-dim);margin-top:2px}
+
+/* TIRAGE */
+.tirage-hero{margin:0 16px 16px;background:linear-gradient(135deg,#1e1200,#2a1a06);border:1px solid var(--orange);border-radius:var(--radius);padding:24px 20px;text-align:center;position:relative;overflow:hidden}
+.tirage-hero::before{content:'🎯';position:absolute;right:-8px;top:-8px;font-size:80px;opacity:.1;transform:rotate(10deg)}
+.tirage-hero h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream);margin-bottom:6px}
+.chasseur-select-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer}
+.check-circle{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.check-circle.checked{background:var(--green);border-color:var(--green)}
+.check-circle.checked::after{content:'✓';color:white;font-size:12px;font-weight:700}
+.resultat-poste{margin:0 16px 12px;background:linear-gradient(135deg,#1e2a1a,#162416);border:2px solid var(--green);border-radius:var(--radius);padding:16px}
+.resultat-header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.big-num{width:52px;height:52px;border-radius:50%;background:var(--green);color:white;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 20px rgba(74,124,63,.5)}
+.resultat-name{font-size:18px;font-weight:700;color:var(--cream)}
+.resultat-chasseur{font-size:13px;color:var(--text-dim);margin-top:2px}
+
+/* MON POSTE */
+.monposte-hero{margin:0 16px 16px;border-radius:var(--radius);overflow:hidden;border:2px solid var(--green);position:relative}
+.monposte-img-placeholder{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--bg3),var(--card));display:flex;align-items:center;justify-content:center;font-size:48px}
+.monposte-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:24px 16px 14px}
+.monposte-overlay .big{font-family:'Playfair Display',serif;font-size:24px;color:var(--cream);font-weight:900}
+.monposte-overlay .sub{font-size:13px;color:var(--cream-dim);margin-top:2px}
+
+/* SECURITE */
+.securite-header{background:linear-gradient(135deg,#2a0a0a,#3a1010);border-bottom:2px solid var(--danger);padding:60px 20px 20px;text-align:center}
+.securite-header h2{font-family:'Playfair Display',serif;font-size:22px;color:#ff6b6b;margin-bottom:6px}
+.regle-item{display:flex;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.regle-num{width:28px;height:28px;border-radius:50%;background:var(--danger);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.validation-block{margin:16px;background:linear-gradient(135deg,#0a1a0a,#0e220e);border:2px solid var(--green);border-radius:var(--radius);padding:20px;text-align:center}
+.timer-bar-wrap{background:var(--bg3);border-radius:99px;height:6px;margin-bottom:12px;overflow:hidden}
+.timer-bar{height:100%;background:var(--green);border-radius:99px;transition:width .1s linear}
+
+/* ADMIN */
+.member-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:white;flex-shrink:0}
+.code-card{background:linear-gradient(135deg,var(--green-dim),#1a3a18);border:1px solid var(--green);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:12px}
+.code-card .code-val{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--cream);letter-spacing:8px;margin:8px 0}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;display:flex;align-items:flex-end}
+.modal-overlay.hidden{display:none}
+.modal-sheet{width:100%;background:var(--bg2);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:20px;max-height:85vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 16px}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--cream);margin-bottom:16px}
+
+/* TIRAGE ANIM */
+#tirage-animation{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px}
+#tirage-animation.hidden{display:none}
+.tirage-anim-title{font-family:'Playfair Display',serif;font-size:28px;color:var(--cream);text-align:center;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tirage-spinner{width:80px;height:80px;border:4px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LOADER */
+#app-loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:500}
+#app-loader.hidden{display:none}
+.loader-logo{font-size:52px}
+.loader-title{font-family:'Playfair Display',serif;font-size:28px;color:var(--cream)}
+.loader-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+.loader-msg{font-size:13px;color:var(--text-dim)}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--border);border-radius:99px;padding:10px 20px;font-size:13px;color:var(--text);z-index:300;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-dim)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:14px;line-height:1.6}
+
+/* ANGLES */
+.angles-viz{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.angles-viz h3{font-size:13px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .4s ease both}
+.fade-up-d1{animation-delay:.05s}.fade-up-d2{animation-delay:.1s}.fade-up-d3{animation-delay:.15s}
+
+@keyframes confetti-fall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:250;animation:confetti-fall 2s ease-in forwards}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="app-loader">
+  <div class="loader-logo">🎯</div>
+  <div class="loader-title">ChassePlan</div>
+  <div class="loader-spinner"></div>
+  <div class="loader-msg" id="loader-msg">Connexion…</div>
+</div>
+
+<!-- LOGIN -->
+<div class="screen hidden" id="screen-login">
+  <div style="flex:1;background:radial-gradient(ellipse at 30% 20%,#1e3a1a 0%,var(--bg) 60%);display:flex;flex-direction:column;justify-content:center;padding:40px 28px;gap:20px">
+    <div class="login-logo fade-up">
+      <div class="login-logo-icon">🎯</div>
+      <h1>ChassePlan</h1>
+      <p>Gestion des postes de chasse</p>
+    </div>
+    <div class="login-tabs fade-up fade-up-d1">
+      <button class="login-tab active" onclick="switchTab('connexion')">Connexion</button>
+      <button class="login-tab" onclick="switchTab('rejoindre')">Rejoindre</button>
+      <button class="login-tab" onclick="switchTab('creer')">Créer</button>
+    </div>
+    <div id="login-form" class="fade-up fade-up-d2"></div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen hidden" id="screen-home">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="home-title">ChassePlan</div>
+      <div class="topbar-sub" id="home-sub">Bonjour !</div>
+    </div>
+    <span id="home-badge"></span>
+  </div>
+  <div class="scroll-area">
+    <div class="hero-banner fade-up">
+      <h2 id="home-societe">Bienvenue</h2>
+      <p>Gérez vos postes et tirages en temps réel</p>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="badge badge-green">🔥 Firebase</span>
+        <span class="badge badge-gold" id="home-role-badge">Chasseur</span>
+      </div>
+    </div>
+    <div class="stat-row fade-up fade-up-d1">
+      <div class="stat-card"><div class="num" id="stat-postes">0</div><div class="lbl">Postes</div></div>
+      <div class="stat-card"><div class="num" id="stat-membres">0</div><div class="lbl">Membres</div></div>
+      <div class="stat-card"><div class="num" id="stat-tirages">0</div><div class="lbl">Tirages</div></div>
+    </div>
+    <div class="next-hunt fade-up fade-up-d2">
+      <h3>📅 Prochaine chasse</h3>
+      <div style="font-size:18px;font-weight:600;color:var(--cream)" id="next-date">—</div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:4px" id="next-lieu">Aucune prévue</div>
+    </div>
+    <div class="section-tag">ACTIONS RAPIDES</div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px" class="fade-up fade-up-d3">
+      <button class="btn btn-orange" onclick="showScreen('screen-tirage')">🎲 Lancer un tirage</button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-carte')">🗺️ Voir la carte</button>
+    </div>
+    <div id="last-tirage-wrap" style="display:none">
+      <div class="section-tag">DERNIER TIRAGE</div>
+      <div id="last-tirage-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CARTE -->
+<div class="screen hidden" id="screen-carte">
+  <div class="topbar">
+    <div><div class="topbar-title">Carte</div><div class="topbar-sub">Plan interactif</div></div>
+    <button class="btn btn-sm btn-ghost" id="btn-add-poste" onclick="setTool('add')" style="width:auto;display:none">＋ Poste</button>
+  </div>
+  <div class="scroll-area">
+    <div class="map-container fade-up">
+      <div class="map-canvas-wrap" id="map-wrap">
+        <canvas id="map-canvas"></canvas>
+        <div class="map-hint" id="map-hint">Chargement…</div>
+      </div>
+      <div class="map-toolbar" id="map-toolbar" style="display:none">
+        <button class="map-tool-btn active-tool" id="tool-view" onclick="setTool('view')">👁 Vue</button>
+        <button class="map-tool-btn" id="tool-add" onclick="setTool('add')">📍 Ajouter</button>
+        <button class="map-tool-btn" onclick="confirmClearPostes()">🗑 Effacer</button>
+      </div>
+    </div>
+    <div class="section-tag">POSTES ENREGISTRÉS</div>
+    <div id="poste-list"></div>
+  </div>
+</div>
+
+<!-- TIRAGE -->
+<div class="screen hidden" id="screen-tirage">
+  <div class="topbar">
+    <div><div class="topbar-title">Tirage</div><div class="topbar-sub">Attribution des postes</div></div>
+  </div>
+  <div class="scroll-area">
+    <div class="tirage-hero fade-up">
+      <h2>Tirage au sort</h2>
+      <p>Sélectionnez les chasseurs présents puis lancez</p>
+    </div>
+    <div class="section-tag">CHASSEURS PRÉSENTS</div>
+    <div id="chasseur-list"></div>
+    <div style="padding:0 16px 16px">
+      <button class="btn btn-orange" onclick="lancerTirage()" id="btn-tirage">🎲 Lancer le tirage</button>
+    </div>
+    <div id="tirage-resultats"></div>
+  </div>
+</div>
+
+<!-- TIRAGE ANIM -->
+<div id="tirage-animation" class="hidden">
+  <div class="tirage-anim-title">Tirage en cours…</div>
+  <div class="tirage-spinner"></div>
+  <div style="color:var(--text-dim);font-size:14px">Attribution des postes</div>
+</div>
+
+<!-- MON POSTE -->
+<div class="screen hidden" id="screen-monposte">
+  <div class="topbar">
+    <div><div class="topbar-title">Mon Poste</div><div class="topbar-sub" id="monposte-date">—</div></div>
+  </div>
+  <div class="scroll-area" id="monposte-scroll"></div>
+</div>
+
+<!-- SECURITE -->
+<div class="screen hidden" id="screen-securite">
+  <div class="securite-header">
+    <h2>⚠️ Règles de Sécurité</h2>
+    <p>Lisez attentivement avant chaque chasse</p>
+  </div>
+  <div class="scroll-area" style="padding-bottom:110px">
+    <div id="regles-list"></div>
+    <div class="validation-block" id="validation-block" style="display:none">
+      <p style="font-size:14px;color:var(--text-dim);margin-bottom:14px;line-height:1.5">Lisez toutes les règles avant de valider.<br>Votre validation sera enregistrée.</p>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:14px" id="timer-label">Lecture en cours…</div>
+      <button class="btn btn-primary" id="btn-valider" onclick="validerSecurite()" disabled>✅ J'ai lu et j'accepte</button>
+    </div>
+    <div id="validation-done" style="display:none;margin:16px;padding:16px;background:rgba(74,124,63,.15);border:1px solid var(--green);border-radius:var(--radius);text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">✅</div>
+      <div style="font-weight:600;color:var(--green-light)">Règles validées</div>
+      <div id="validation-time" style="font-size:12px;color:var(--text-dim);margin-top:4px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="screen hidden" id="screen-admin">
+  <div class="topbar">
+    <div><div class="topbar-title">Société</div><div class="topbar-sub" id="admin-sub">Gestion</div></div>
+    <button class="btn btn-sm btn-danger" onclick="deconnexion()" style="width:auto">Quitter</button>
+  </div>
+  <div class="scroll-area">
+    <div style="margin:0 16px 16px" class="fade-up">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Code d'invitation</div>
+      <div class="code-card">
+        <div style="font-size:12px;color:var(--cream-dim)">Partagez ce code pour inviter des chasseurs</div>
+        <div class="code-val" id="code-val">———</div>
+        <button class="btn btn-ghost btn-sm" onclick="copierCode()" style="margin-top:4px">📋 Copier</button>
+      </div>
+    </div>
+    <div style="margin:0 16px 16px" class="fade-up fade-up-d1">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Membres</div>
+      <div id="membres-list"></div>
+      <button class="btn btn-ghost" onclick="showAddMembre()" style="margin-top:10px">＋ Ajouter un chasseur</button>
+    </div>
+    <div style="margin:0 16px 16px" class="fade-up fade-up-d1">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Règles de sécurité</div>
+      <button class="btn btn-ghost" onclick="showEditRegles()">✏️ Modifier les règles</button>
+    </div>
+    <div style="margin:0 16px 16px" class="fade-up fade-up-d2">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Prochaine chasse</div>
+      <div class="input-group">
+        <label class="input-label">Date</label>
+        <input type="date" class="input" id="input-date" onchange="saveNextHunt()"/>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Lieu / Remarque</label>
+        <input type="text" class="input" id="input-lieu" placeholder="ex: Secteur Nord" oninput="saveNextHunt()"/>
+      </div>
+    </div>
+    <div style="margin:0 16px 16px" class="fade-up fade-up-d3">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Historique des tirages</div>
+      <div id="historique-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="bottomnav" id="bottomnav" style="display:none">
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('screen-home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Accueil<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" id="nav-carte" onclick="showScreen('screen-carte')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    Carte<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" id="nav-tirage" onclick="showScreen('screen-tirage')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Tirage<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" id="nav-monposte" onclick="showScreen('screen-monposte')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    Mon Poste<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" id="nav-securite" onclick="showScreen('screen-securite')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Sécurité<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" id="nav-admin" onclick="showScreen('screen-admin')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Société<div class="nav-dot"></div>
+  </button>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="modal-content"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, arrayUnion, arrayRemove, query, orderBy, deleteDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── CONFIG FIREBASE ──────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyAqRpIIkMTaheSGV2BoTIcyWiOvG71DEUg",
+  authDomain: "test-chasse-3ea7c.firebaseapp.com",
+  projectId: "test-chasse-3ea7c",
+  storageBucket: "test-chasse-3ea7c.firebasestorage.app",
+  messagingSenderId: "1022267288351",
+  appId: "1:1022267288351:web:68a6b60bd7a9eca8615e2a",
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ── STATE LOCAL ──────────────────────────────────────────────
+let currentUser = null;   // Firebase user
+let userDoc = null;        // { nom, prenom, role, societeId }
+let societeDoc = null;     // { nom, code, postes, regles, nextHunt }
+let membres = [];          // [{ id, prenom, nom, email, role }]
+let tirages = [];          // from subcollection
+let selectedChasseurs = new Set();
+let mapTool = 'view';
+let mapCanvas, mapCtx;
+let secTimer = null;
+let unsubSociete = null;
+let unsubMembres = null;
+let unsubTirages = null;
+
+const DEFAULT_REGLES = [
+  "Ne jamais pointer son arme vers une personne, même déchargée.",
+  "Identifier sa cible avec certitude avant de tirer.",
+  "Respecter l'angle de tir défini pour votre poste.",
+  "Ne quittez pas votre poste avant le signal de fin de battue.",
+  "Toujours garder le doigt hors de la détente jusqu'au moment de tirer.",
+  "En cas de doute, abstenez-vous. La sécurité prime sur tout.",
+  "Vérifiez que votre arme est déchargée lors des déplacements.",
+  "Portez un équipement de sécurité visible (gilet orange).",
+  "Signalez immédiatement tout incident à l'organisateur.",
+];
+
+// ── UTILS ────────────────────────────────────────────────────
+function genCode() { return Math.random().toString(36).substr(2,6).toUpperCase(); }
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+function setLoader(msg) {
+  document.getElementById('loader-msg').textContent = msg;
+}
+function hideLoader() {
+  document.getElementById('app-loader').classList.add('hidden');
+}
+function showLoader(msg='Chargement…') {
+  document.getElementById('app-loader').classList.remove('hidden');
+  setLoader(msg);
+}
+function isAdmin() { return userDoc?.role === 'admin'; }
+
+// ── NAVIGATION ───────────────────────────────────────────────
+const NAV_MAP = {
+  'screen-home':'nav-home','screen-carte':'nav-carte','screen-tirage':'nav-tirage',
+  'screen-monposte':'nav-monposte','screen-securite':'nav-securite','screen-admin':'nav-admin'
+};
+window.showScreen = function(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('hidden', s.id !== id));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (NAV_MAP[id]) document.getElementById(NAV_MAP[id])?.classList.add('active');
+  if (id === 'screen-home') renderHome();
+  if (id === 'screen-carte') renderCarte();
+  if (id === 'screen-tirage') renderTirage();
+  if (id === 'screen-monposte') renderMonPoste();
+  if (id === 'screen-securite') renderSecurite();
+  if (id === 'screen-admin') renderAdmin();
+};
+
+// ── AUTH STATE ───────────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    showLoader('Chargement de votre profil…');
+    currentUser = user;
+    try {
+      const uSnap = await getDoc(doc(db, 'users', user.uid));
+      if (!uSnap.exists()) { await signOut(auth); showLogin(); hideLoader(); return; }
+      userDoc = uSnap.data();
+      await loadSociete();
+      startListeners();
+      document.getElementById('bottomnav').style.display = 'flex';
+      hideLoader();
+      showScreen('screen-home');
+    } catch(e) {
+      console.error(e);
+      hideLoader();
+      showLogin();
+    }
+  } else {
+    currentUser = null; userDoc = null; societeDoc = null;
+    stopListeners();
+    hideLoader();
+    showLogin();
+  }
+});
+
+async function loadSociete() {
+  const sSnap = await getDoc(doc(db, 'societes', userDoc.societeId));
+  if (sSnap.exists()) societeDoc = sSnap.data();
+}
+
+function startListeners() {
+  stopListeners();
+  // Societe live
+  unsubSociete = onSnapshot(doc(db, 'societes', userDoc.societeId), snap => {
+    if (snap.exists()) { societeDoc = snap.data(); refreshCurrentScreen(); }
+  });
+  // Membres
+  unsubMembres = onSnapshot(collection(db, 'societes', userDoc.societeId, 'membres'), snap => {
+    membres = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshCurrentScreen();
+  });
+  // Tirages
+  unsubTirages = onSnapshot(
+    query(collection(db, 'societes', userDoc.societeId, 'tirages'), orderBy('date', 'desc')),
+    snap => { tirages = snap.docs.map(d => ({ id: d.id, ...d.data() })); refreshCurrentScreen(); }
+  );
+}
+
+function stopListeners() {
+  if (unsubSociete) { unsubSociete(); unsubSociete = null; }
+  if (unsubMembres) { unsubMembres(); unsubMembres = null; }
+  if (unsubTirages) { unsubTirages(); unsubTirages = null; }
+}
+
+function refreshCurrentScreen() {
+  const visible = [...document.querySelectorAll('.screen')].find(s => !s.classList.contains('hidden'));
+  if (visible) showScreen(visible.id);
+}
+
+// ── LOGIN ────────────────────────────────────────────────────
+function showLogin() {
+  document.getElementById('bottomnav').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-login').classList.remove('hidden');
+  renderLoginForm();
+}
+
+let loginTab = 'connexion';
+window.switchTab = function(tab) {
+  loginTab = tab;
+  document.querySelectorAll('.login-tab').forEach((el, i) => {
+    el.classList.toggle('active', ['connexion','rejoindre','creer'][i] === tab);
+  });
+  renderLoginForm();
+};
+
+function renderLoginForm() {
+  const f = document.getElementById('login-form');
+  if (loginTab === 'connexion') {
+    f.innerHTML = `
+      <div class="input-group"><label class="input-label">Email</label>
+        <input type="email" class="input" id="l-email" placeholder="email@exemple.fr" autocomplete="email"/></div>
+      <div class="input-group"><label class="input-label">Mot de passe</label>
+        <input type="password" class="input" id="l-pass" placeholder="••••••••"/></div>
+      <button class="btn btn-primary" onclick="doLogin()" style="margin-top:8px">Se connecter</button>`;
+  } else if (loginTab === 'rejoindre') {
+    f.innerHTML = `
+      <div class="input-group"><label class="input-label">Prénom</label>
+        <input type="text" class="input" id="r-prenom" placeholder="Jean"/></div>
+      <div class="input-group"><label class="input-label">Nom</label>
+        <input type="text" class="input" id="r-nom" placeholder="Dupont"/></div>
+      <div class="input-group"><label class="input-label">Email</label>
+        <input type="email" class="input" id="r-email" placeholder="email@exemple.fr"/></div>
+      <div class="input-group"><label class="input-label">Mot de passe</label>
+        <input type="password" class="input" id="r-pass" placeholder="••••••••"/></div>
+      <div class="input-group"><label class="input-label">Code d'invitation</label>
+        <input type="text" class="input" id="r-code" placeholder="ABC123" style="text-transform:uppercase;letter-spacing:4px;font-size:20px;text-align:center"/></div>
+      <button class="btn btn-primary" onclick="doRejoindre()" style="margin-top:8px">Rejoindre la société</button>`;
+  } else {
+    f.innerHTML = `
+      <div class="input-group"><label class="input-label">Nom de la société</label>
+        <input type="text" class="input" id="c-soc" placeholder="Société de chasse du Bois Vert"/></div>
+      <div class="input-group"><label class="input-label">Votre prénom</label>
+        <input type="text" class="input" id="c-prenom" placeholder="Jean"/></div>
+      <div class="input-group"><label class="input-label">Votre nom</label>
+        <input type="text" class="input" id="c-nom" placeholder="Dupont"/></div>
+      <div class="input-group"><label class="input-label">Email</label>
+        <input type="email" class="input" id="c-email" placeholder="email@exemple.fr"/></div>
+      <div class="input-group"><label class="input-label">Mot de passe</label>
+        <input type="password" class="input" id="c-pass" placeholder="••••••••"/></div>
+      <button class="btn btn-orange" onclick="doCreer()" style="margin-top:8px">Créer ma société</button>`;
+  }
+}
+
+window.doLogin = async function() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  if (!email || !pass) { showToast('⚠️ Remplissez tous les champs'); return; }
+  try {
+    showLoader('Connexion…');
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    hideLoader(); showLogin();
+    showToast('❌ Email ou mot de passe incorrect');
+  }
+};
+
+window.doRejoindre = async function() {
+  const prenom = document.getElementById('r-prenom').value.trim();
+  const nom = document.getElementById('r-nom').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pass = document.getElementById('r-pass').value;
+  const code = document.getElementById('r-code').value.trim().toUpperCase();
+  if (!prenom||!nom||!email||!pass||!code) { showToast('⚠️ Remplissez tous les champs'); return; }
+  showLoader('Recherche de la société…');
+  try {
+    // Find societe by code - scan (small dataset)
+    const { getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const snap = await getDocs(collection(db, 'societes'));
+    const societe = snap.docs.find(d => d.data().code === code);
+    if (!societe) { hideLoader(); showLogin(); showToast('❌ Code invalide'); return; }
+    setLoader('Création du compte…');
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: `${prenom} ${nom}` });
+    const uid = cred.user.uid;
+    const userData = { prenom, nom, email, role: 'chasseur', societeId: societe.id };
+    await setDoc(doc(db, 'users', uid), userData);
+    await setDoc(doc(db, 'societes', societe.id, 'membres', uid), { prenom, nom, email, role: 'chasseur' });
+    showToast(`✅ Bienvenue dans ${societe.data().nom} !`);
+  } catch(e) {
+    hideLoader(); showLogin();
+    showToast('❌ ' + (e.code === 'auth/email-already-in-use' ? 'Email déjà utilisé' : e.message));
+  }
+};
+
+window.doCreer = async function() {
+  const nomSoc = document.getElementById('c-soc').value.trim();
+  const prenom = document.getElementById('c-prenom').value.trim();
+  const nom = document.getElementById('c-nom').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const pass = document.getElementById('c-pass').value;
+  if (!nomSoc||!prenom||!nom||!email||!pass) { showToast('⚠️ Remplissez tous les champs'); return; }
+  showLoader('Création du compte…');
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: `${prenom} ${nom}` });
+    const uid = cred.user.uid;
+    const sid = cred.user.uid + '_soc';
+    const code = genCode();
+    setLoader('Création de la société…');
+    await setDoc(doc(db, 'societes', sid), {
+      nom: nomSoc, code, postes: [], regles: DEFAULT_REGLES, nextHunt: null, createdBy: uid,
+    });
+    await setDoc(doc(db, 'users', uid), { prenom, nom, email, role: 'admin', societeId: sid });
+    await setDoc(doc(db, 'societes', sid, 'membres', uid), { prenom, nom, email, role: 'admin' });
+    showToast(`✅ Société "${nomSoc}" créée !`);
+  } catch(e) {
+    hideLoader(); showLogin();
+    showToast('❌ ' + (e.code === 'auth/email-already-in-use' ? 'Email déjà utilisé' : e.message));
+  }
+};
+
+window.deconnexion = async function() {
+  stopListeners();
+  await signOut(auth);
+  document.getElementById('bottomnav').style.display = 'none';
+};
+
+// ── HOME ─────────────────────────────────────────────────────
+function renderHome() {
+  if (!userDoc || !societeDoc) return;
+  document.getElementById('home-title').textContent = societeDoc.nom;
+  document.getElementById('home-sub').textContent = `Bonjour, ${userDoc.prenom} !`;
+  document.getElementById('home-societe').textContent = societeDoc.nom;
+  document.getElementById('home-role-badge').textContent = isAdmin() ? '👑 Admin' : '🎯 Chasseur';
+  document.getElementById('stat-postes').textContent = (societeDoc.postes||[]).length;
+  document.getElementById('stat-membres').textContent = membres.length;
+  document.getElementById('stat-tirages').textContent = tirages.length;
+  const nh = societeDoc.nextHunt;
+  if (nh?.date) {
+    const d = new Date(nh.date + 'T12:00:00');
+    document.getElementById('next-date').textContent = d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    document.getElementById('next-lieu').textContent = nh.lieu || '—';
+  }
+  // last tirage
+  if (tirages.length > 0) {
+    const last = tirages[0];
+    document.getElementById('last-tirage-wrap').style.display = '';
+    let html = '';
+    (last.resultats||[]).forEach(r => {
+      const m = membres.find(x => x.id === r.chasseurId);
+      const p = (societeDoc.postes||[]).find(x => x.id === r.posteId);
+      if (!m || !p) return;
+      html += `<div class="resultat-poste"><div class="resultat-header">
+        <div class="big-num">${p.num}</div>
+        <div><div class="resultat-name">${p.nom}</div><div class="resultat-chasseur">${m.prenom} ${m.nom}</div></div>
+      </div></div>`;
+    });
+    document.getElementById('last-tirage-content').innerHTML = html;
+  }
+}
+
+// ── CARTE ────────────────────────────────────────────────────
+function renderCarte() {
+  if (!societeDoc) return;
+  const admin = isAdmin();
+  document.getElementById('btn-add-poste').style.display = admin ? '' : 'none';
+  document.getElementById('map-toolbar').style.display = admin ? 'flex' : 'none';
+  mapCanvas = document.getElementById('map-canvas');
+  const wrap = document.getElementById('map-wrap');
+  mapCanvas.width = wrap.offsetWidth;
+  mapCanvas.height = wrap.offsetHeight;
+  mapCtx = mapCanvas.getContext('2d');
+  drawMap();
+  renderPosteList();
+  mapCanvas.onclick = onMapClick;
+  document.getElementById('map-hint').textContent = admin && mapTool === 'add'
+    ? 'Tapez pour placer un poste' : 'Plan du territoire';
+}
+
+function drawMap() {
+  if (!mapCtx || !mapCanvas) return;
+  const w = mapCanvas.width, h = mapCanvas.height;
+  mapCtx.fillStyle = '#1a2e14'; mapCtx.fillRect(0,0,w,h);
+  mapCtx.strokeStyle = 'rgba(255,255,255,.04)'; mapCtx.lineWidth = 1;
+  for(let x=0;x<w;x+=40){mapCtx.beginPath();mapCtx.moveTo(x,0);mapCtx.lineTo(x,h);mapCtx.stroke();}
+  for(let y=0;y<h;y+=40){mapCtx.beginPath();mapCtx.moveTo(0,y);mapCtx.lineTo(w,y);mapCtx.stroke();}
+  const trees=[[.1,.2],[.8,.15],[.6,.7],[.15,.75],[.5,.4],[.85,.6],[.3,.5],[.7,.3]];
+  trees.forEach(([tx,ty])=>{mapCtx.font='24px sans-serif';mapCtx.globalAlpha=.12;mapCtx.fillText('🌲',tx*w-10,ty*h+10);});
+  mapCtx.globalAlpha=1;
+  mapCtx.font='bold 11px sans-serif';mapCtx.fillStyle='rgba(255,255,255,.2)';mapCtx.textAlign='center';
+  mapCtx.fillText('TERRITOIRE DE CHASSE',w/2,h-10);
+  (societeDoc?.postes||[]).forEach(p => {
+    const px=p.x*w, py=p.y*h;
+    mapCtx.shadowColor='rgba(0,0,0,.5)';mapCtx.shadowBlur=8;
+    mapCtx.beginPath();mapCtx.arc(px,py,16,0,Math.PI*2);mapCtx.fillStyle='#4a7c3f';mapCtx.fill();
+    mapCtx.strokeStyle='white';mapCtx.lineWidth=2;mapCtx.stroke();mapCtx.shadowBlur=0;
+    mapCtx.font='bold 12px sans-serif';mapCtx.fillStyle='white';mapCtx.textAlign='center';mapCtx.textBaseline='middle';
+    mapCtx.fillText(p.num,px,py);mapCtx.textBaseline='alphabetic';
+  });
+}
+
+function onMapClick(e) {
+  if (mapTool !== 'add' || !isAdmin()) return;
+  const rect = mapCanvas.getBoundingClientRect();
+  const x = (e.clientX-rect.left)/rect.width;
+  const y = (e.clientY-rect.top)/rect.height;
+  showAddPosteModal(x,y);
+}
+
+window.setTool = function(tool) {
+  mapTool = tool;
+  document.getElementById('tool-view').classList.toggle('active-tool', tool==='view');
+  document.getElementById('tool-add').classList.toggle('active-tool', tool==='add');
+  document.getElementById('map-hint').textContent = tool==='add' ? 'Tapez sur la carte pour placer un poste' : 'Plan du territoire';
+};
+
+function showAddPosteModal(x,y) {
+  const num = (societeDoc?.postes||[]).length + 1;
+  showModal(`
+    <div class="modal-title">Nouveau poste</div>
+    <input type="hidden" id="px" value="${x}"/><input type="hidden" id="py" value="${y}"/>
+    <div class="input-group"><label class="input-label">Numéro</label>
+      <input type="number" class="input" id="p-num" value="${num}"/></div>
+    <div class="input-group"><label class="input-label">Nom du poste</label>
+      <input type="text" class="input" id="p-nom" placeholder="ex: Le Chêne Blanc"/></div>
+    <div class="input-group"><label class="input-label">Angles de tir / Description</label>
+      <input type="text" class="input" id="p-desc" placeholder="ex: Tir vers le Nord uniquement"/></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1" onclick="savePoste()">Enregistrer</button>
+    </div>`);
+}
+
+window.savePoste = async function() {
+  const num = parseInt(document.getElementById('p-num').value) || ((societeDoc?.postes||[]).length+1);
+  const nom = document.getElementById('p-nom').value.trim() || `Poste ${num}`;
+  const desc = document.getElementById('p-desc').value.trim();
+  const x = parseFloat(document.getElementById('px').value);
+  const y = parseFloat(document.getElementById('py').value);
+  const newPoste = { id: Date.now().toString(), num, nom, desc, x, y };
+  try {
+    const postes = [...(societeDoc?.postes||[]), newPoste];
+    await updateDoc(doc(db, 'societes', userDoc.societeId), { postes });
+    closeModal();
+    showToast(`📍 Poste ${num} ajouté`);
+  } catch(e) { showToast('❌ Erreur: ' + e.message); }
+};
+
+window.confirmClearPostes = async function() {
+  if (!isAdmin()) return;
+  if (!confirm('Supprimer tous les postes ?')) return;
+  await updateDoc(doc(db, 'societes', userDoc.societeId), { postes: [] });
+  showToast('🗑 Postes supprimés');
+};
+
+function renderPosteList() {
+  const postes = societeDoc?.postes || [];
+  const el = document.getElementById('poste-list');
+  if (!postes.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📍</div><p>${isAdmin() ? 'Activez l\'outil "Ajouter" et tapez sur la carte.' : 'Aucun poste défini par l\'admin.'}</p></div>`;
+    return;
+  }
+  el.innerHTML = postes.map(p => `
+    <div class="poste-list-item" onclick="showPosteDetail('${p.id}')">
+      <div class="poste-num">${p.num}</div>
+      <div class="poste-info"><div class="name">${p.nom}</div><div class="desc">${p.desc||'Aucune description'}</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`).join('');
+}
+
+window.showPosteDetail = function(id) {
+  const p = (societeDoc?.postes||[]).find(x=>x.id===id); if(!p) return;
+  showModal(`
+    <div class="modal-title">Poste ${p.num} — ${p.nom}</div>
+    <div style="width:100%;aspect-ratio:16/9;background:var(--bg3);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:14px">🌲</div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:4px">Angles de tir</div>
+      <div style="font-size:15px">${p.desc||'Non renseigné'}</div>
+    </div>
+    ${isAdmin() ? `<button class="btn btn-danger" onclick="deletePoste('${p.id}')">🗑 Supprimer</button>` : ''}
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="closeModal()">Fermer</button>`);
+};
+
+window.deletePoste = async function(id) {
+  const postes = (societeDoc?.postes||[]).filter(p=>p.id!==id);
+  await updateDoc(doc(db, 'societes', userDoc.societeId), { postes });
+  closeModal(); showToast('🗑 Poste supprimé');
+};
+
+// ── TIRAGE ───────────────────────────────────────────────────
+function renderTirage() {
+  if (!societeDoc) return;
+  const el = document.getElementById('chasseur-list');
+  if (!membres.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>Aucun membre enregistré.</p></div>`;
+    return;
+  }
+  el.innerHTML = membres.map(m => {
+    const checked = selectedChasseurs.has(m.id);
+    return `<div class="chasseur-select-item" onclick="toggleChasseur('${m.id}')">
+      <div class="check-circle ${checked ? 'checked' : ''}" id="chk-${m.id}"></div>
+      <div class="avatar">${m.prenom[0]}${m.nom[0]}</div>
+      <div style="flex:1"><div style="font-weight:600;font-size:14px">${m.prenom} ${m.nom}</div>
+        <div style="font-size:12px;color:var(--text-dim)">${m.role==='admin'?'👑 Organisateur':'🎯 Chasseur'}</div></div>
+    </div>`;
+  }).join('');
+  renderTirageResultats();
+  // Seul admin peut lancer
+  document.getElementById('btn-tirage').style.display = isAdmin() ? '' : 'none';
+}
+
+window.toggleChasseur = function(id) {
+  if (selectedChasseurs.has(id)) selectedChasseurs.delete(id);
+  else selectedChasseurs.add(id);
+  const el = document.getElementById(`chk-${id}`);
+  if (el) el.classList.toggle('checked', selectedChasseurs.has(id));
+};
+
+window.lancerTirage = async function() {
+  if (!isAdmin()) return;
+  const chasseurs = [...selectedChasseurs];
+  if (!chasseurs.length) { showToast('⚠️ Sélectionnez au moins un chasseur'); return; }
+  const postes = societeDoc?.postes || [];
+  if (postes.length < chasseurs.length) {
+    showToast(`⚠️ Il faut au moins ${chasseurs.length} postes (${postes.length} disponibles)`); return;
+  }
+  document.getElementById('tirage-animation').classList.remove('hidden');
+  setTimeout(async () => {
+    document.getElementById('tirage-animation').classList.add('hidden');
+    const shuffled = [...postes].sort(() => Math.random()-.5);
+    const resultats = chasseurs.map((cid,i) => ({ chasseurId: cid, posteId: shuffled[i].id }));
+    try {
+      await addDoc(collection(db, 'societes', userDoc.societeId, 'tirages'), {
+        date: new Date().toISOString(), resultats
+      });
+      confetti(); showToast('🎯 Tirage effectué !');
+      selectedChasseurs.clear();
+    } catch(e) { showToast('❌ Erreur: ' + e.message); }
+  }, 2200);
+};
+
+function renderTirageResultats() {
+  const el = document.getElementById('tirage-resultats');
+  if (!tirages.length) { el.innerHTML = ''; return; }
+  const last = tirages[0];
+  const d = new Date(last.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+  let html = `<div class="section-tag">RÉSULTATS DU ${d.toUpperCase()}</div>`;
+  (last.resultats||[]).forEach(r => {
+    const m = membres.find(x=>x.id===r.chasseurId);
+    const p = (societeDoc?.postes||[]).find(x=>x.id===r.posteId);
+    if(!m||!p) return;
+    html += `<div class="resultat-poste"><div class="resultat-header">
+      <div class="big-num">${p.num}</div>
+      <div><div class="resultat-name">${p.nom}</div><div class="resultat-chasseur">${m.prenom} ${m.nom}</div></div>
+    </div><div style="font-size:12px;color:var(--text-dim)">${p.desc||''}</div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── MON POSTE ────────────────────────────────────────────────
+function renderMonPoste() {
+  const el = document.getElementById('monposte-scroll');
+  document.getElementById('monposte-date').textContent = tirages.length
+    ? new Date(tirages[0].date).toLocaleDateString('fr-FR') : '—';
+  if (!tirages.length) {
+    el.innerHTML = `<div class="empty-state" style="padding-top:60px"><div class="icon">🎯</div><p>Aucun tirage effectué.</p></div>`; return;
+  }
+  const last = tirages[0];
+  const res = (last.resultats||[]).find(r => r.chasseurId === currentUser?.uid);
+  if (!res) {
+    el.innerHTML = `<div class="empty-state" style="padding-top:60px"><div class="icon">🎯</div><p>Vous n'avez pas participé<br>au dernier tirage.</p></div>`; return;
+  }
+  const p = (societeDoc?.postes||[]).find(x=>x.id===res.posteId);
+  if (!p) { el.innerHTML='<div class="empty-state"><p>Poste introuvable.</p></div>'; return; }
+  el.innerHTML = `
+    <div class="monposte-hero fade-up">
+      <div class="monposte-img-placeholder">🌲</div>
+      <div class="monposte-overlay"><div class="big">Poste ${p.num}</div><div class="sub">${p.nom}</div></div>
+    </div>
+    <div class="angles-viz fade-up fade-up-d1">
+      <h3>🎯 Angles de tir autorisés</h3>
+      <div style="display:flex;justify-content:center"><canvas id="angles-canvas" width="200" height="200"></canvas></div>
+      <p style="text-align:center;font-size:13px;color:var(--text-dim);margin-top:10px">${p.desc||'Non renseigné'}</p>
+    </div>
+    <div class="card fade-up fade-up-d2">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px">📍 Position sur le plan</div>
+      <div style="font-size:14px">X: ${Math.round(p.x*100)}% — Y: ${Math.round(p.y*100)}%</div>
+    </div>`;
+  requestAnimationFrame(() => drawAngles(90));
+}
+
+function drawAngles(deg) {
+  const canvas = document.getElementById('angles-canvas'); if(!canvas) return;
+  const ctx = canvas.getContext('2d'), cx=100, cy=100, R=80;
+  ctx.clearRect(0,0,200,200);
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle='#1a2a1a';ctx.fill();
+  ctx.strokeStyle='var(--border)';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(255,255,255,.3)';
+  ctx.fillText('N',cx,cy-R+12);ctx.fillText('S',cx,cy+R-12);ctx.fillText('E',cx+R-12,cy);ctx.fillText('O',cx-R+12,cy);
+  const half=(deg/2)*Math.PI/180;
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R-6,-Math.PI/2-half,-Math.PI/2+half);ctx.closePath();
+  ctx.fillStyle='rgba(74,124,63,.4)';ctx.fill();ctx.strokeStyle='var(--green-light)';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,6,0,Math.PI*2);ctx.fillStyle='var(--green-light)';ctx.fill();
+}
+
+// ── SECURITE ─────────────────────────────────────────────────
+function renderSecurite() {
+  const regles = societeDoc?.regles || DEFAULT_REGLES;
+  document.getElementById('regles-list').innerHTML = regles.map((r,i) => `
+    <div class="regle-item"><div class="regle-num">${i+1}</div><div style="font-size:14px;line-height:1.5">${r}</div></div>`).join('');
+  const todayKey = new Date().toDateString();
+  const validKey = `val_${currentUser?.uid}_${todayKey}`;
+  const already = localStorage.getItem(validKey);
+  if (already) {
+    document.getElementById('validation-block').style.display = 'none';
+    document.getElementById('validation-done').style.display = '';
+    document.getElementById('validation-time').textContent = `Validé le ${new Date(already).toLocaleString('fr-FR')}`;
+  } else {
+    document.getElementById('validation-block').style.display = '';
+    document.getElementById('validation-done').style.display = 'none';
+    startSecTimer();
+  }
+}
+
+function startSecTimer() {
+  const btn = document.getElementById('btn-valider');
+  const bar = document.getElementById('timer-bar');
+  const lbl = document.getElementById('timer-label');
+  if (!btn) return;
+  btn.disabled = true; let rem = 10;
+  bar.style.width = '100%';
+  if (secTimer) clearInterval(secTimer);
+  secTimer = setInterval(() => {
+    rem--;
+    bar.style.width = `${(rem/10)*100}%`;
+    lbl.textContent = rem > 0 ? `Lecture en cours… (${rem}s)` : 'Vous pouvez maintenant valider';
+    if (rem <= 0) { clearInterval(secTimer); btn.disabled = false; }
+  }, 1000);
+}
+
+window.validerSecurite = function() {
+  const now = new Date().toISOString();
+  const todayKey = new Date().toDateString();
+  localStorage.setItem(`val_${currentUser?.uid}_${todayKey}`, now);
+  document.getElementById('validation-block').style.display = 'none';
+  document.getElementById('validation-done').style.display = '';
+  document.getElementById('validation-time').textContent = `Validé le ${new Date(now).toLocaleString('fr-FR')}`;
+  showToast('✅ Règles validées !');
+};
+
+// ── ADMIN ────────────────────────────────────────────────────
+function renderAdmin() {
+  if (!societeDoc || !userDoc) return;
+  document.getElementById('admin-sub').textContent = societeDoc.nom;
+  document.getElementById('code-val').textContent = societeDoc.code;
+  // membres
+  document.getElementById('membres-list').innerHTML = membres.map(m => `
+    <div class="member-item">
+      <div class="avatar">${m.prenom[0]}${m.nom[0]}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px">${m.prenom} ${m.nom}</div>
+        <div style="font-size:12px;color:var(--text-dim)">${m.role==='admin'?'👑 Admin':'🎯 Chasseur'} · ${m.email}</div>
+      </div>
+      ${m.id !== currentUser?.uid && isAdmin() ? `<button class="btn btn-sm btn-ghost" onclick="removeMembre('${m.id}')">✕</button>` : ''}
+    </div>`).join('');
+  // next hunt
+  const nh = societeDoc.nextHunt;
+  if (nh?.date) document.getElementById('input-date').value = nh.date;
+  if (nh?.lieu) document.getElementById('input-lieu').value = nh.lieu;
+  // historique
+  const hl = document.getElementById('historique-list');
+  if (!tirages.length) { hl.innerHTML='<div class="empty-state"><p>Aucun tirage effectué</p></div>'; return; }
+  hl.innerHTML = tirages.map(t => {
+    const d = new Date(t.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+    return `<div class="card" style="margin:0 0 8px">
+      <div style="font-weight:600;color:var(--cream);margin-bottom:4px">📅 ${d}</div>
+      <div style="font-size:13px;color:var(--text-dim)">${(t.resultats||[]).length} chasseur(s) — ${(t.resultats||[]).length} poste(s)</div>
+    </div>`;
+  }).join('');
+}
+
+window.copierCode = function() {
+  navigator.clipboard?.writeText(societeDoc?.code || '').then(() => showToast('📋 Code copié !'));
+};
+
+window.saveNextHunt = async function() {
+  if (!isAdmin()) return;
+  const date = document.getElementById('input-date').value;
+  const lieu = document.getElementById('input-lieu').value;
+  await updateDoc(doc(db, 'societes', userDoc.societeId), { nextHunt: { date, lieu } });
+};
+
+window.showAddMembre = function() {
+  showModal(`
+    <div class="modal-title">Ajouter un chasseur</div>
+    <div class="input-group"><label class="input-label">Prénom</label><input type="text" class="input" id="nm-p" placeholder="Jean"/></div>
+    <div class="input-group"><label class="input-label">Nom</label><input type="text" class="input" id="nm-n" placeholder="Dupont"/></div>
+    <div class="input-group"><label class="input-label">Email</label><input type="email" class="input" id="nm-e" placeholder="jean@exemple.fr"/></div>
+    <div class="input-group"><label class="input-label">Mot de passe provisoire</label><input type="text" class="input" id="nm-pw" placeholder="chasseur2024"/></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1" onclick="addMembre()">Ajouter</button>
+    </div>`);
+};
+
+window.addMembre = async function() {
+  const prenom = document.getElementById('nm-p').value.trim();
+  const nom = document.getElementById('nm-n').value.trim();
+  const email = document.getElementById('nm-e').value.trim();
+  const pass = document.getElementById('nm-pw').value.trim();
+  if (!prenom||!nom||!email||!pass) { showToast('⚠️ Remplissez tous les champs'); return; }
+  try {
+    // Créer le compte Firebase Auth
+    const { getApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { initializeApp: initApp2 } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getAuth: getAuth2, createUserWithEmailAndPassword: createUser2 } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    // Secondary app to avoid signing out current user
+    let app2;
+    try { app2 = getApp('secondary'); } catch(e) { app2 = initApp2(firebaseConfig, 'secondary'); }
+    const auth2 = getAuth2(app2);
+    const cred = await createUser2(auth2, email, pass);
+    const uid = cred.user.uid;
+    await setDoc(doc(db, 'users', uid), { prenom, nom, email, role: 'chasseur', societeId: userDoc.societeId });
+    await setDoc(doc(db, 'societes', userDoc.societeId, 'membres', uid), { prenom, nom, email, role: 'chasseur' });
+    await auth2.signOut();
+    closeModal(); showToast(`✅ ${prenom} ${nom} ajouté`);
+  } catch(e) {
+    showToast('❌ ' + (e.code==='auth/email-already-in-use' ? 'Email déjà utilisé' : e.message));
+  }
+};
+
+window.removeMembre = async function(uid) {
+  if (!confirm('Retirer ce membre ?')) return;
+  await deleteDoc(doc(db, 'societes', userDoc.societeId, 'membres', uid));
+  showToast('Membre retiré');
+};
+
+window.showEditRegles = function() {
+  showModal(`
+    <div class="modal-title">Règles de sécurité</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px">Une règle par ligne</div>
+    <textarea class="input" id="regles-ta" style="min-height:220px">${(societeDoc?.regles||DEFAULT_REGLES).join('\n')}</textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveRegles()">Enregistrer</button>
+    </div>`);
+};
+
+window.saveRegles = async function() {
+  const raw = document.getElementById('regles-ta').value;
+  const regles = raw.split('\n').map(r=>r.trim()).filter(Boolean);
+  await updateDoc(doc(db, 'societes', userDoc.societeId), { regles });
+  closeModal(); showToast('✅ Règles mises à jour');
+};
+
+// ── MODAL ────────────────────────────────────────────────────
+window.showModal = function(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+};
+window.closeModal = function() { document.getElementById('modal-overlay').classList.add('hidden'); };
+window.closeModalOutside = function(e) { if(e.target===document.getElementById('modal-overlay')) closeModal(); };
+
+// ── CONFETTI ─────────────────────────────────────────────────
+function confetti() {
+  const colors=['#4a7c3f','#c4621d','#c9a84c','#6aad5a'];
+  for(let i=0;i<30;i++){
+    const el=document.createElement('div');el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw';el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDelay=Math.random()+'s';document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+  }
+}
+</script>
+</body>
+</html>
